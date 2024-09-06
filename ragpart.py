@@ -81,69 +81,69 @@ def semantic_chunking(text, max_chunk_size=512, overlap=128):
         i += max_chunk_size - overlap
     return chunks
 
-# def combined_chunking(text):
-#     title_chunks = title_based_chunking(text)
-#     final_chunks = []
-#     for chunk in title_chunks:
-#         section_chunks = section_based_chunking(chunk)
-#         for section_chunk in section_chunks:
-#             semantic_chunks = semantic_chunking(section_chunk)
-#             final_chunks.extend(semantic_chunks)
-#     return final_chunks
-
 def combined_chunking(text):
-    with ThreadPoolExecutor() as executor:
-        title_chunks = title_based_chunking(text)
-        final_chunks = []
-        section_chunks = executor.map(section_based_chunking, title_chunks)
-        for chunks in section_chunks:
-            semantic_chunks = executor.map(semantic_chunking, chunks)
-            final_chunks.extend(list(semantic_chunks))
+    title_chunks = title_based_chunking(text)
+    final_chunks = []
+    for chunk in title_chunks:
+        section_chunks = section_based_chunking(chunk)
+        for section_chunk in section_chunks:
+            semantic_chunks = semantic_chunking(section_chunk)
+            final_chunks.extend(semantic_chunks)
     return final_chunks
 
-# def store_chunks_in_pinecone(chunks, index, max_batch_size_mb=2):
-#     chunk_embeddings = model.encode(chunks)
-#     vectors = [{"id": f"chunk-{i}", "values": embedding.tolist(), "metadata": {"content": chunk, "type": "chunk"}}
-#                for i, (embedding, chunk) in enumerate(zip(chunk_embeddings, chunks))]
-
-#     # Split vectors into batches that are under the maximum batch size
-#     max_batch_size_bytes = max_batch_size_mb * 1024 * 1024
-#     current_batch = []
-#     current_batch_size = 0
-
-#     for vector in vectors:
-#         vector_size = sys.getsizeof(json.dumps(vector))
-#         if current_batch_size + vector_size > max_batch_size_bytes:
-#             index.upsert(current_batch)
-#             current_batch = [vector]
-#             current_batch_size = vector_size
-#         else:
-#             current_batch.append(vector)
-#             current_batch_size += vector_size
-
-#     if current_batch:
-#         index.upsert(current_batch)
+# def combined_chunking(text):
+#     with ThreadPoolExecutor() as executor:
+#         title_chunks = title_based_chunking(text)
+#         final_chunks = []
+#         section_chunks = executor.map(section_based_chunking, title_chunks)
+#         for chunks in section_chunks:
+#             semantic_chunks = executor.map(semantic_chunking, chunks)
+#             final_chunks.extend(list(semantic_chunks))
+#     return final_chunks
 
 def store_chunks_in_pinecone(chunks, index, max_batch_size_mb=2):
-    chunk_embeddings = model.encode(chunks, batch_size=16)  # Increase batch size for parallel encoding
+    chunk_embeddings = model.encode(chunks)
     vectors = [{"id": f"chunk-{i}", "values": embedding.tolist(), "metadata": {"content": chunk, "type": "chunk"}}
                for i, (embedding, chunk) in enumerate(zip(chunk_embeddings, chunks))]
 
-    # Compute max size in bytes more efficiently
+    # Split vectors into batches that are under the maximum batch size
     max_batch_size_bytes = max_batch_size_mb * 1024 * 1024
-    current_batch, current_batch_size = [], 0
+    current_batch = []
+    current_batch_size = 0
 
     for vector in vectors:
         vector_size = sys.getsizeof(json.dumps(vector))
         if current_batch_size + vector_size > max_batch_size_bytes:
             index.upsert(current_batch)
-            current_batch, current_batch_size = [vector], vector_size
+            current_batch = [vector]
+            current_batch_size = vector_size
         else:
             current_batch.append(vector)
             current_batch_size += vector_size
 
     if current_batch:
         index.upsert(current_batch)
+
+# def store_chunks_in_pinecone(chunks, index, max_batch_size_mb=2):
+#     chunk_embeddings = model.encode(chunks, batch_size=16)  # Increase batch size for parallel encoding
+#     vectors = [{"id": f"chunk-{i}", "values": embedding.tolist(), "metadata": {"content": chunk, "type": "chunk"}}
+#                for i, (embedding, chunk) in enumerate(zip(chunk_embeddings, chunks))]
+
+#     # Compute max size in bytes more efficiently
+#     max_batch_size_bytes = max_batch_size_mb * 1024 * 1024
+#     current_batch, current_batch_size = [], 0
+
+#     for vector in vectors:
+#         vector_size = sys.getsizeof(json.dumps(vector))
+#         if current_batch_size + vector_size > max_batch_size_bytes:
+#             index.upsert(current_batch)
+#             current_batch, current_batch_size = [vector], vector_size
+#         else:
+#             current_batch.append(vector)
+#             current_batch_size += vector_size
+
+#     if current_batch:
+#         index.upsert(current_batch)
 
 
 def get_relevant_chunks(query, index, top_k=5):
