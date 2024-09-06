@@ -7,7 +7,7 @@ def token_size(input_text):
     huggingface_token = "***REDACTED***"
 
     # Load the pre-trained tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct", token=huggingface_token)
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B", token=huggingface_token)
 
     tokenizer.pad_token = tokenizer.eos_token
 
