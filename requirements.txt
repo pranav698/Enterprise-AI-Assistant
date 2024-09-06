@@ -10,3 +10,4 @@ together
 gTTS
 transformers
 torch
+python-docx
