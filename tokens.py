@@ -4,10 +4,10 @@ import streamlit as st
 
 def token_size(input_text):
     # Load the Hugging Face token from the environment variables
-    huggingface_token = "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"
+    huggingface_token = "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"
 
     # Load the pre-trained tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct", token=huggingface_token)
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B", token=huggingface_token)
 
     tokenizer.pad_token = tokenizer.eos_token
 
