@@ -79,7 +79,7 @@ def process_local_pdfs(data):
 
 # Function to send OTP via email using Outlook SMTP server
 def send_otp_via_email(email, otp):
-    sender_email = 'sihbrocode@outlook.com'  # Replace with your email
+    sender_email = 'sihhrohithe@outlook.com'  # Replace with your email
     sender_password = 'Rohith@123'  # Replace with your email password
 
     subject = "Your OTP for Login"
