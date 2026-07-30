@@ -1,12 +1,8 @@
 import streamlit as st
 import hashlib
 import sqlite3
-import smtplib
-import random
 import re
 import pandas as pd
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from ragpart import generate_response_from_chunks, get_relevant_chunks, create_index, extract_text_from_pdf, clean_text, store_chunks_in_pinecone, combined_chunking
 from translate import translate, generate_audio
 
@@ -42,35 +38,6 @@ def add_user(email, password):
     c.execute('INSERT INTO users (email, password) VALUES (?, ?)', 
               (email, hashed_password))
     conn.commit()
-
-# Function to generate a random 6-digit OTP
-def generate_otp():
-    return str(random.randint(100000, 999999))
-
-# Function to send OTP via email using Outlook SMTP server
-def send_otp_via_email(email, otp):
-    sender_email = 'sihbrocode@outlook.com'  # Replace with your email
-    sender_password = 'Rohith@123'  # Replace with your email password
-
-    subject = "Your OTP for Login"
-    body = f"Your OTP is: {otp}"
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = email
-    msg['Subject'] = subject
-
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        # Connect to the Outlook SMTP server
-        with smtplib.SMTP('smtp.office365.com', 587) as server:
-            server.starttls()  # Upgrade to a secure connection
-            server.login(sender_email, sender_password)  # Login to the email server
-            server.send_message(msg)  # Send the email
-        st.success("OTP sent successfully to your email.")
-    except Exception as e:
-        st.error(f"Failed to send OTP: {e}")
 
 # Function to validate password strength
 def validate_password(password):
@@ -181,7 +148,7 @@ def main_app():
             st.experimental_rerun()
 
 def login_page():
-    st.title('Two-Factor Authentication App')
+    st.title('Login / Sign Up')
 
     # Option to login or register
     option = st.selectbox('Choose an option:', ['Login', 'Register'])
@@ -217,29 +184,11 @@ def login_page():
         if st.button('Login'):
             user = check_user(email)
             if user and user[1] == hash_password(password):
-                # Generate OTP
-                otp = generate_otp()
-
-                # Send OTP via email
-                send_otp_via_email(email, otp)
-                st.session_state['otp'] = otp
                 st.session_state['email'] = email
+                st.session_state.authenticated = True
+                st.success('Login successful!')
             else:
                 st.error('Invalid email or password.')
-
-    # OTP verification
-    if 'otp' in st.session_state:
-        st.subheader('OTP Verification')
-        entered_otp = st.text_input('Enter OTP')
-
-        if st.button('Verify OTP'):
-            if entered_otp == st.session_state['otp']:
-                st.success('Login successful!')
-                st.session_state.authenticated = True
-                del st.session_state['otp']
-                # st.experimental_rerun()
-            else:
-                st.error('Invalid OTP.')
 
 # Main app logic
 if st.session_state.authenticated:
