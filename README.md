@@ -253,14 +253,6 @@ Upload one or both via the sidebar → "Upload a PDF" → wait for indexing → 
 - Code passes `bandit` and `pip-audit`
 - New features include docstrings and type hints
 
----
-
-## 👤 Author
-
-**Pranav Surya R S**
-- GitHub: [@pranavsurya77](https://github.com/pranavsurya77)
-- Portfolio: [pranavportfolio-roan.vercel.app](https://pranavportfolio-roan.vercel.app)
-- LinkedIn: [Pranav Surya](https://linkedin.com/in/Pranav Surya)
 
 ---
 
