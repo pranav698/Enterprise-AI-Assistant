@@ -13,6 +13,9 @@ import os
 import tempfile
 from ragpart import generate_response_from_chunks, get_relevant_chunks, create_index, extract_text_from_pdf, clean_text, store_chunks_in_pinecone, combined_chunking
 from translate import translate, generate_audio
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize session state
 if 'authenticated' not in st.session_state:
@@ -74,8 +77,13 @@ def process_local_pdfs(data):
 
 # Function to send the Word document via email
 def send_word_document_via_email(email, queries_and_responses):
-    sender_email = '***REDACTED***'
-    sender_password = '***REDACTED***'
+    sender_email = os.getenv("SMTP_USER")
+    sender_password = os.getenv("SMTP_PASSWORD")
+    smtp_host = os.getenv("SMTP_HOST", "smtp.office365.com")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    if not sender_email or not sender_password:
+        st.error("SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD in your .env file.")
+        return
 
     subject = "Your Queries and Responses"
     body = "Attached is the Word document containing your queries and responses."
@@ -109,7 +117,7 @@ def send_word_document_via_email(email, queries_and_responses):
         msg.attach(part)
 
     try:
-        with smtplib.SMTP('smtp.office365.com', 587) as server:
+        with smtplib.SMTP(smtp_host, smtp_port) as server:
             server.starttls()
             server.login(sender_email, sender_password)
             server.send_message(msg)

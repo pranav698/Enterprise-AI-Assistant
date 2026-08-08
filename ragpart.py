@@ -9,11 +9,13 @@ from concurrent.futures import ThreadPoolExecutor
 from huggingface_hub import InferenceClient
 import sys
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize Pinecone
-# Initialize Pinecone
-pinecone_api_key = "***REDACTED***"
-pinecone_environment = "us-east-1"
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+pinecone_environment = os.getenv("PINECONE_ENVIRONMENT", "us-east-1")
 if not pinecone_api_key:
     raise ValueError("Pinecone API key not found. Please set it in the environment variables.")
 pc = Pinecone(api_key=pinecone_api_key)
@@ -26,7 +28,7 @@ index_name = "llama3"
 
 def create_index():
     if index_name in pc.list_indexes().names():
-        pc.delete_index(index_name)
+        return pc.Index(index_name)
     pc.create_index(
         name=index_name, 
         dimension=384,
@@ -164,7 +166,9 @@ def generate_response_from_chunks(chunks, query):
     )
     user_query = prompt_template.format(context=combined_content, query=query)
     
-    huggingface_token = "***REDACTED***"
+    huggingface_token = os.getenv("HF_TOKEN")
+    if not huggingface_token:
+        raise ValueError("HF_TOKEN not found. Please set it in the environment variables.")
     client = InferenceClient("meta-llama/Meta-Llama-3-8B-Instruct", token=huggingface_token)
 
     # Generate the response

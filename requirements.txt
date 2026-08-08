@@ -1,6 +1,5 @@
 streamlit
-pycryptodome
-db-sqlite3
+python-dotenv
 pandas
 sentence-transformers
 pinecone-client

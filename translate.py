@@ -4,9 +4,15 @@ from gtts import gTTS
 import io
 from tokens import token_size
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
+
 def translate(text, lang):
     # Load the Together API key from the environment variables
-    together_api_key = "***REDACTED***"
+    together_api_key = os.getenv("TOGETHER_API_KEY")
+    if not together_api_key:
+        raise ValueError("TOGETHER_API_KEY not found. Please set it in the environment variables.")
     # Setting up the model
     client = Together(api_key=together_api_key)
 
